@@ -2,7 +2,7 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eric-mathison/docker-prometheus/Build%20Docker%20Image%20and%20Push?style=for-the-badge)
 
-This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody`. This modified image changes the user to as `docker` allowing prometheus to communicate with the host node using unix sockets.
+This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody`. This modified image changes the user to `docker` allowing prometheus to communicate with the host node using unix sockets.
 
 ## How to Use this Image
 
@@ -29,6 +29,14 @@ services:
 ```
 
 ## Configuration
+
+### Prerequisite
+
+A user named `docker` must be created on the host system and added to the `docker` group.
+
+### Prometheus Configuration
+
+A configuration file `./prometheus.yml` is provided and may be updated with your own scrape configs. The present config is currently configured for a `Docker Swarm environment` and listening for `CAdvisor`, `Node Exporter`, and `Docker Daemon Metrics`.
 
 ### GH Actions
 

@@ -1,0 +1,123 @@
+global:
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    evaluation_interval: 15s
+alerting:
+    alertmanagers:
+        - follow_redirects: true
+          scheme: http
+          timeout: 10s
+          api_version: v2
+          static_configs:
+              - targets: []
+scrape_configs:
+    - job_name: prometheus
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      static_configs:
+          - targets:
+                - localhost:9090
+    - job_name: load_balancer
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      relabel_configs:
+          - source_labels: [__meta_dockerswarm_node_address]
+            separator: ;
+            regex: (.*)
+            target_label: __address__
+            replacement: $1:9113
+            action: replace
+      dockerswarm_sd_configs:
+          - follow_redirects: true
+            host: unix:///var/run/docker.sock
+            role: nodes
+            port: 80
+            filters: []
+            refresh_interval: 1m
+    - job_name: nodes
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      relabel_configs:
+          - source_labels: [__meta_dockerswarm_node_address]
+            separator: ;
+            regex: (.*)
+            target_label: __address__
+            replacement: $1:9100
+            action: replace
+      dockerswarm_sd_configs:
+          - follow_redirects: true
+            host: unix:///var/run/docker.sock
+            role: nodes
+            port: 80
+            filters: []
+            refresh_interval: 1m
+    - job_name: docker
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      relabel_configs:
+          - source_labels: [__meta_dockerswarm_node_address]
+            separator: ;
+            regex: (.*)
+            target_label: __address__
+            replacement: $1:9323
+            action: replace
+          - source_labels: [__meta_dockerswarm_node_hostname]
+            separator: ;
+            regex: (.*)
+            target_label: instance
+            replacement: $1
+            action: replace
+      dockerswarm_sd_configs:
+          - follow_redirects: true
+            host: unix:///var/run/docker.sock
+            role: nodes
+            port: 80
+            filters: []
+            refresh_interval: 1m
+    - job_name: dockerswarm
+      honor_timestamps: true
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      metrics_path: /metrics
+      scheme: http
+      follow_redirects: true
+      relabel_configs:
+          - source_labels: [__meta_dockerswarm_task_desired_state]
+            separator: ;
+            regex: running
+            replacement: $1
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
+            separator: ;
+            regex: .+
+            replacement: $1
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_lavel_prometheus_job]
+            separator: ;
+            regex: (.*)
+            target_label: job
+            replacement: $1
+            action: replace
+      dockerswarm_sd_configs:
+          - follow_redirects: true
+            host: unix:///var/run/docker.sock
+            role: tasks
+            port: 80
+            filters: []
+            refresh_interval: 1m
