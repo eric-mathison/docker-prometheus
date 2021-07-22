@@ -2,7 +2,7 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eric-mathison/docker-prometheus/Build%20Docker%20Image%20and%20Push?style=for-the-badge)
 
-This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody`. This modified image retracts that change and allows prometheus to run as `root` allowing prometheus to communicate with the host node using unix sockets.
+This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody`. This modified image changes the user to as `docker` allowing prometheus to communicate with the host node using unix sockets.
 
 ## How to Use this Image
 
