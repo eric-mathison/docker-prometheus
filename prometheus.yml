@@ -37,7 +37,7 @@ scrape_configs:
             action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
-            host: unix:///var/run/docker.sock
+            host: tcp://captain-socket-proxy:2375
             role: nodes
             port: 80
             filters: []
@@ -58,7 +58,7 @@ scrape_configs:
             action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
-            host: unix:///var/run/docker.sock
+            host: tcp://captain-socket-proxy:2375
             role: nodes
             port: 80
             filters: []
@@ -85,7 +85,7 @@ scrape_configs:
             action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
-            host: unix:///var/run/docker.sock
+            host: tcp://captain-socket-proxy:2375
             role: nodes
             port: 80
             filters: []
@@ -116,7 +116,7 @@ scrape_configs:
             action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
-            host: unix:///var/run/docker.sock
+            host: tcp://captain-socket-proxy:2375
             role: tasks
             port: 80
             filters: []
