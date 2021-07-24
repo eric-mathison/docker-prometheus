@@ -2,9 +2,36 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/eric-mathison/docker-prometheus/Build%20Docker%20Image%20and%20Push?style=for-the-badge)
 
-This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody`. This modified image changes the user to `docker` allowing prometheus to communicate with the host node using unix sockets.
+This image is based off the official [Prometheus](https://hub.docker.com/r/prom/prometheus/) Docker image. Some versions ago, the offical image changed the user to `nobody` which prevents prometheus from being able to communicate with the Docker Daemon socket. This image uses [Docker-Socket-Proxy](https://github.com/Tecnativa/docker-socket-proxy) to be able to securely access the Daemon socket.
 
 ## How to Use this Image
+
+## Start a `Docker-Socket-Proxy` server instance
+
+```bash
+docker container run \
+    -d --privileged \
+    --name captain-socket-proxy \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -p 2375:2375 \
+    tecnativa/docker-socket-proxy
+```
+
+or as a service if you are using `Docker Swarm`
+
+```bash
+docker service create --name captain-socket-proxy \
+    --network captain-overlay-network \
+    --publish 2375:2375 \
+    --limit-memory 128M \
+    --reserve-memory 64M \
+    --mount type=bind,source=/var/run/docker.sock,dst=/var/run/docker.sock \
+    --env SERVICES=1 \
+    --env NODES=1 \
+    --env TASKS=1 \
+    --env NETWORKS=1 \
+    tecnativa/docker-socket-proxy:latest
+```
 
 ## Start a `Prometheus` server instance
 
@@ -29,10 +56,6 @@ services:
 ```
 
 ## Configuration
-
-### Prerequisite
-
-A user named `docker` must be created on the host system and added to the `docker` group.
 
 ### Prometheus Configuration
 
