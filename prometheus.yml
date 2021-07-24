@@ -11,6 +11,8 @@ alerting:
           static_configs:
               - targets: []
 scrape_configs:
+    # Monitor Prometheus itself
+    # prometheus-exporter
     - job_name: prometheus
       honor_timestamps: true
       scrape_interval: 15s
@@ -21,6 +23,8 @@ scrape_configs:
       static_configs:
           - targets:
                 - localhost:9090
+    # Monitor the Swarm Nginx Load Balancer
+    # nginx-exporter
     - job_name: load_balancer
       honor_timestamps: true
       scrape_interval: 15s
@@ -29,7 +33,7 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
-          - source_labels: [__meta_dockerswarm_node_address]
+          - source_labels: [__meta_dockerswarm_service_name]
             separator: ;
             regex: (.*)
             target_label: __address__
@@ -38,10 +42,12 @@ scrape_configs:
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
-            role: nodes
+            role: tasks
             port: 80
             filters: []
             refresh_interval: 1m
+    # Monitor Docker Swarm Nodes
+    # node-exporter
     - job_name: nodes
       honor_timestamps: true
       scrape_interval: 15s
@@ -63,6 +69,8 @@ scrape_configs:
             port: 80
             filters: []
             refresh_interval: 1m
+    # Monitor Docker Daemon
+    # docker daemon.json metrics
     - job_name: docker
       honor_timestamps: true
       scrape_interval: 15s
@@ -90,6 +98,8 @@ scrape_configs:
             port: 80
             filters: []
             refresh_interval: 1m
+    # Monitor Swarm Containers
+    # CAdvisor
     - job_name: dockerswarm
       honor_timestamps: true
       scrape_interval: 15s
