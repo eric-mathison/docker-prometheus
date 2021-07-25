@@ -41,7 +41,7 @@ scrape_configs:
             regex: running
             action: keep
           - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-            regex: .+
+            regex: nginx-exporter
             action: keep
           - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
             target_label: job
@@ -63,10 +63,18 @@ scrape_configs:
             target_label: __address__
             replacement: $1:9100
             action: replace
+          - source_labels: [__meta_dockerswarm_task_desired_state]
+            regex: running
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
+            regex: node-exporter
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
+            target_label: job
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
-            role: nodes
+            role: tasks
     # Monitor Docker Daemon
     # docker daemon.json metrics
     - job_name: docker
@@ -90,7 +98,7 @@ scrape_configs:
             role: nodes
     # Monitor Swarm Containers
     # CAdvisor
-    - job_name: dockerswarm
+    - job_name: containers
       honor_timestamps: true
       scrape_interval: 15s
       scrape_timeout: 10s
@@ -98,11 +106,15 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
+          - source_labels: [__meta_dockerswarm_service_name]
+            target_label: __address__
+            replacement: $1:8080
+            action: replace
           - source_labels: [__meta_dockerswarm_task_desired_state]
             regex: running
             action: keep
           - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-            regex: .+
+            regex: cadvisor
             action: keep
           - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
             target_label: job
