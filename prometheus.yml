@@ -34,18 +34,21 @@ scrape_configs:
       follow_redirects: true
       relabel_configs:
           - source_labels: [__meta_dockerswarm_service_name]
-            separator: ;
-            regex: (.*)
             target_label: __address__
             replacement: $1:9113
             action: replace
+          - source_labels: [__meta_dockerswarm_task_desired_state]
+            regex: running
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
+            regex: .+
+            action: keep
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
+            target_label: job
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
             role: tasks
-            port: 80
-            filters: []
-            refresh_interval: 1m
     # Monitor Docker Swarm Nodes
     # node-exporter
     - job_name: nodes
@@ -56,9 +59,7 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
-          - source_labels: [__meta_dockerswarm_node_address]
-            separator: ;
-            regex: (.*)
+          - source_labels: [__meta_dockerswarm_service_name]
             target_label: __address__
             replacement: $1:9100
             action: replace
@@ -66,9 +67,6 @@ scrape_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
             role: nodes
-            port: 80
-            filters: []
-            refresh_interval: 1m
     # Monitor Docker Daemon
     # docker daemon.json metrics
     - job_name: docker
@@ -79,25 +77,17 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
-          - source_labels: [__meta_dockerswarm_node_address]
-            separator: ;
-            regex: (.*)
+          - source_labels: [__meta_dockerswarm_service_name]
             target_label: __address__
             replacement: $1:9323
             action: replace
-          - source_labels: [__meta_dockerswarm_node_hostname]
-            separator: ;
-            regex: (.*)
+          - source_labels: [__meta_dockerswarm_service_name]
             target_label: instance
-            replacement: $1
             action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
             role: nodes
-            port: 80
-            filters: []
-            refresh_interval: 1m
     # Monitor Swarm Containers
     # CAdvisor
     - job_name: dockerswarm
@@ -109,25 +99,14 @@ scrape_configs:
       follow_redirects: true
       relabel_configs:
           - source_labels: [__meta_dockerswarm_task_desired_state]
-            separator: ;
             regex: running
-            replacement: $1
             action: keep
           - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-            separator: ;
             regex: .+
-            replacement: $1
             action: keep
-          - source_labels: [__meta_dockerswarm_service_lavel_prometheus_job]
-            separator: ;
-            regex: (.*)
+          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
             target_label: job
-            replacement: $1
-            action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
             role: tasks
-            port: 80
-            filters: []
-            refresh_interval: 1m
