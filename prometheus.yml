@@ -101,6 +101,10 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
+          - source_labels: [__meta_dockerswarm_node_address]
+            target_label: __address__
+            replacement: $1:49153
+            action: replace
           - source_labels: [__meta_dockerswarm_task_desired_state]
             regex: running
             action: keep
