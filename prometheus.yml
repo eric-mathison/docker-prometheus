@@ -59,22 +59,17 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
-          - source_labels: [__meta_dockerswarm_service_name]
+          - source_labels: [__meta_dockerswarm_node_address]
             target_label: __address__
             replacement: $1:9100
             action: replace
-          - source_labels: [__meta_dockerswarm_task_desired_state]
-            regex: running
-            action: keep
-          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-            regex: node-exporter
-            action: keep
-          - source_labels: [__meta_dockerswarm_service_label_prometheus_job]
-            target_label: job
+          - source_labels: [__meta_dockerswarm_node_address]
+            target_label: instance
+            action: replace
       dockerswarm_sd_configs:
           - follow_redirects: true
             host: http://captain-socket-proxy:2375
-            role: tasks
+            role: nodes
     # Monitor Docker Daemon
     # docker daemon.json metrics
     - job_name: docker
@@ -106,7 +101,7 @@ scrape_configs:
       scheme: http
       follow_redirects: true
       relabel_configs:
-          - source_labels: [__meta_dockerswarm_service_name]
+          - source_labels: [__meta_dockerswarm_node_address]
             target_label: __address__
             replacement: $1:8080
             action: replace
