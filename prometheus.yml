@@ -105,6 +105,10 @@ scrape_configs:
             target_label: __address__
             replacement: $1:49153
             action: replace
+          - source_labels: [__meta_dockerswarm_node_address]
+            target_label: instance
+            replacement: $1:49153
+            action: replace
           - source_labels: [__meta_dockerswarm_task_desired_state]
             regex: running
             action: keep
